@@ -6,6 +6,8 @@
 // @match      http://time.valtech.dk/registration/reg_day_edit.asp*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
 // @require  https://raw.github.com/carhartl/jquery-cookie/master/jquery.cookie.js
+// @downloadURL https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js
+// @updateURL https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js
 // @copyright  2012+, Sune Jensen & Gunnar Hafdal
 // ==/UserScript==
 
