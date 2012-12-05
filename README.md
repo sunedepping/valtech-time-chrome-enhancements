@@ -1,4 +1,4 @@
-Chrome Enhancements Valtech Time Registration
+Chrome Enhancements for Valtech Time Registration
 ================================
 
 The aim of this project is to make the time registration (NaviWEB) support Google Chrome browser and to make the time registration as easy with direct integration to Toogl.com timer.
@@ -15,3 +15,11 @@ Installation
 3. Add the [Import From Toggl script](https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js)
 
 Please report any issues [here](https://github.com/sunetjensen/valtech-time-chrome-enhancements/issues). 
+
+
+Other nice tools
+------
+
+Import your toggl.com time entries into Google Docs Spreadsheat using Zapier
+
+https://zapier.com/zapbook/toggl/google-docs/4560/toggl-time-entries-to-google-docs-spreadsheet/
