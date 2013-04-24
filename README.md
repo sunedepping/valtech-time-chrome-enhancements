@@ -13,6 +13,7 @@ Installation
 1. Add the plugin Tampermonkey to your Chrome browser https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo
 2. Add the [Add Activity script](https://github.com/sunetjensen/valtech-time-chrome-enhancements/raw/master/AddActivity.user.js)
 3. Add the [Import From Toggl script](https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js)
+4. Add the [Auto Login script](https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/AutoLogin.user.js)
 
 Please report any issues [here](https://github.com/sunetjensen/valtech-time-chrome-enhancements/issues). 
 
