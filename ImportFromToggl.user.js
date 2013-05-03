@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       Import from Toggler
 // @namespace  NaviWEB
-// @version    0.11
+// @version    0.12
 // @description  Imports data from Toggl
 // @match      http://time.valtech.dk/registration/reg_day_edit.asp*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
