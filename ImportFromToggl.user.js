@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       Import from Toggler
 // @namespace  NaviWEB
-// @version    0.10
+// @version    0.11
 // @description  Imports data from Toggl
 // @match      http://time.valtech.dk/registration/reg_day_edit.asp*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
@@ -10,6 +10,7 @@
 // @updateURL https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js
 // @copyright  2012+, Sune Jensen & Gunnar Hafdal
 // ==/UserScript==
+
 function fillTimeRegistrationLine(project, activity, description, time) {
     
     for(var i = 6; i < $("input").length; i = i + 9) {
@@ -28,7 +29,6 @@ function fillTimeRegistrationLine(project, activity, description, time) {
     }
     
     return false;
-        
     
     // $.each(
     //1Arbejdstype
@@ -40,9 +40,8 @@ function fillTimeRegistrationLine(project, activity, description, time) {
     //7qty
     //8olddescrip
     //9descrip
-    
-    
 }
+
 function createTimeTask(project, activity, description, time){
     var task = {};
     task.project = project;
@@ -50,10 +49,12 @@ function createTimeTask(project, activity, description, time){
     task.description = description;
     task.time = time;
     return task;
-};
+}
+
 function processTogglDataError(jqXHR, textStatus, errorThrown) {
     console.log("Error:" + textStatus);
 }
+
 function processTogglData(json) {
     if(json.data.length == 0) {
         alert("No time entries found");
@@ -123,8 +124,6 @@ function processTogglData(json) {
         }
     }
     
-    
-    
     //id: 49448529
     //description: PROACT-30: Writing User stories
     //billable: false
@@ -138,13 +137,14 @@ function processTogglData(json) {
     //user_id: 220015
     //project: [object Object]
 }
+
 function fetchFromToggl() {
-    var api_key = $.cookie("toggl_api_key");
-    if(!api_key) {
-        api_key = prompt("Toggl API key", "");
-        $.cookie("toggl_api_key", api_key, { expires: 365 });
-    }
-    console.log("API key used: " + api_key); 
+    //var api_key = $.cookie("toggl_api_key");
+    //if(!api_key) {
+    //    api_key = prompt("Toggl API key", "");
+    //    $.cookie("toggl_api_key", api_key, { expires: 365 });
+    //}
+    //console.log("API key used: " + api_key); 
     
     var date_string = document.getElementsByClassName("MainTopTitle")[0].innerHTML;
     
@@ -167,8 +167,6 @@ function fetchFromToggl() {
     $.ajax({
         url: url,
         dataType: "json",
-        username: api_key,
-        password: "api_token",
         success: processTogglData,
         error: processTogglDataError,
         data: {
@@ -177,12 +175,16 @@ function fetchFromToggl() {
         }
         
     }); 
+    //    username: api_key,
+    //    password: "api_token",
 }
+
 $(document).ajaxStart(function(){ 
     $('#ajaxBusy').show(); 
 }).ajaxStop(function(){ 
     $('#ajaxBusy').hide();
 });
+
 $(document).ready(function() {
     $('#Form2').before('<input type="button" value="Fetch from Toggl" id="fetchfromtoggl" /> <span id="ajaxBusy" style="display: none">Chatting up Toggl...</span>');
     console.log("Toggl button added");
