@@ -52,6 +52,7 @@ function createTimeTask(project, activity, description, time){
 }
 
 function processTogglDataError(jqXHR, textStatus, errorThrown) {
+    alert("Argh, we were unable to fetch your toggl time registrations!#% But hey, have you checked if you are logged in to toggl.com in your browser?");
     console.log("Error:" + textStatus);
 }
 
