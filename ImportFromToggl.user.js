@@ -1,22 +1,27 @@
 // ==UserScript==
 // @name       Import from Toggler
 // @namespace  NaviWEB
-// @version    0.12
+// @version    1.0
 // @description  Imports data from Toggl
 // @match      http://time.valtech.dk/registration/reg_day_edit.asp*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
 // @require  https://raw.github.com/carhartl/jquery-cookie/master/jquery.cookie.js
 // @downloadURL https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js
 // @updateURL https://raw.github.com/sunetjensen/valtech-time-chrome-enhancements/master/ImportFromToggl.user.js
-// @copyright  2012+, Sune Jensen & Gunnar Hafdal
+// @copyright  2013+, Sune Jensen
 // ==/UserScript==
+
+var time_entries;
+var time_entry_key;
+var registrations;
+var api_key;
 
 function fillTimeRegistrationLine(project, activity, description, time) {
     
     for(var i = 6; i < $("input").length; i = i + 9) {
         //console.log("Compare: " + $("input")[i].value + " === " + project);
         
-        if($("input")[i].value === project && $("input")[i-1].value === activity && ($("input")[i+6].value === "" || $("input")[i+6].value === description)) {
+        if($("input")[i].value === project && $("input")[i-1].value === activity && $("input")[i+6].value === "") {
             var timestring = ""+time;
             timestring = timestring.replace(".",",");
             
@@ -42,88 +47,97 @@ function fillTimeRegistrationLine(project, activity, description, time) {
     //9descrip
 }
 
-function createTimeTask(project, activity, description, time){
-    var task = {};
-    task.project = project;
-    task.activity = activity;
-    task.description = description;
-    task.time = time;
-    return task;
-}
-
 function processTogglDataError(jqXHR, textStatus, errorThrown) {
     alert("Argh, we were unable to fetch your toggl time registrations!#% But hey, have you checked if you are logged in to toggl.com in your browser?");
     console.log("Error:" + textStatus);
 }
 
-function processTogglData(json) {
-    if(json.data.length == 0) {
-        alert("No time entries found");
+function processProjectDataFromToggl(json) {
+    if(json == null || json.length == 0) {
+        alert("We could no find project data!");
         return false;
     }
     
-    console.log ("JSON data fetched from Toggl");
+    var project = json.data.name;  
+    console.log("Project " + project + " successfully loaded");
     
-    var registration = [];
+    project = project.match(/^([a-zA-Z]+-[0-9]+): ([0-9]+)/);
+    if(project == null || project.length != 3) {
+        alert("Couldn't parse project description: " + project);
+        processNextTimeEntry();
+        return false;
+    }
+            
+    //console.log("Found project: " + project[1] + ", Activity: " + project[2]);
+    var reg = time_entries[time_entry_key];
+    var seconds = reg.duration;
+    var time = Math.ceil((seconds/60/60)*4)/4;
+    var description = reg.description;
     
-    $.each(json.data, function(idx, reg) {
-        //console.log(reg);
-        //console.log("ID: " + idx + ", Start: " + reg.start);
-        
-        if(reg.stop == null) {
-            alert("Your timer is still running for "+reg.description);
-        }
-        else {
-            var seconds = reg.duration-59;
-            
-            if(seconds < 1) {
-                return true;
+    if(registrations.length > 0){
+        for (var i = registrations.length - 1; i >= 0; i--) {
+            if(registrations[i].project===project[1] && registrations[i].activity === project[2] && registrations[i].description === description) {
+                registrations[i].time = registrations[i].time + time;
+                console.log("Time added to existing registration for project: " + project);
+                processNextTimeEntry();
+                return false;
             }
-                
-            var time = Math.ceil((seconds/60/60)*4)/4;
-            
-            var description = reg.description;
-            
-            if(reg.project == null || reg.project.name == null) {
-                alert("No project selected for time entry: " + reg.description);
-                return true;
-            }
-            var project = reg.project.name.match(/^([a-zA-Z]+-[0-9]+): ([0-9]+)/);
-            
-            if(project == null || project.length != 3) {
-                alert("Couldn't parse project description: " + reg.project.name);
-                return true;
-            }
-            
-            //console.log("Found project: " + project[1] + ", Activity: " + project[2]);
-            var task = false;
-            if(registration.length === 0){
-                task = createTimeTask(project[1], project[2], description, time);
-            } else {
-                for (var i = registration.length - 1; i >= 0; i--) {
-                    var r = registration[i];
-                    if(r.project===project[1] && r.activity === project[2] && r.description === description){
-                        r.time = time + r.time;
-                        task = false;
-                    } else {
-                        task = createTimeTask(project[1], project[2], description, time);
-                    }
-                }
-            }
-            
-            if(task){
-                registration.push(task);
-            }
-        }
-    });
-    
-    
-    for (var i = registration.length - 1; i >= 0; i--) {
-        var r = registration[i];
-        if(!fillTimeRegistrationLine(r.project, r.activity,r.description,r.time)){
-            alert("You need to add a task line to "+r.project+":"+r.activity+" to be able to add your time for the task: \""+r.description+"\"");
         }
     }
+    console.log("New entry added for project: " + project);
+    registrations.push({project: project[1], activity: project[2], description: description, time: time});
+    processNextTimeEntry();   
+}
+
+function processNextTimeEntry() {
+    time_entry_key++;
+       
+    if(typeof time_entries[time_entry_key] === "undefined") {
+        console.log ("Starting to fill " + registrations.length + " registrations to fields");
+        for (var i = registrations.length - 1; i >= 0; i--) {
+            var r = registrations[i];
+            if(!fillTimeRegistrationLine(r.project, r.activity,r.description,r.time)){
+                alert("You need to add a task line to "+r.project+":"+r.activity+" to be able to add your time for the task: \""+r.description+"\"");
+            }
+        }
+        return false;
+    }
+    
+    var reg = time_entries[time_entry_key];
+    
+    console.log ("Processing time entry "+reg.description);
+    
+    if(reg.stop == null) {
+        alert("Your timer is still running for "+reg.description);
+        processNextTimeEntry();
+        return false;
+    }
+    
+    if(reg.duration-59 < 1) {
+        console.log ("Time less than a minute for time entry!");
+        processNextTimeEntry();
+        return false;
+    }
+            
+    if(reg.pid == null) {
+        alert("No project selected for time entry: " + reg.description);
+        processNextTimeEntry();
+        return false;
+    }
+    
+    var url = "https://www.toggl.com/api/v8/projects/" + reg.pid;
+    $.ajax(
+        url,
+        { 
+            dataType: "json",
+            type: "get",
+            success: processProjectDataFromToggl,
+            error: processTogglDataError,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa(api_key + ":api_token"));
+            }
+        }
+    );
     
     //id: 49448529
     //description: PROACT-30: Writing User stories
@@ -139,13 +153,30 @@ function processTogglData(json) {
     //project: [object Object]
 }
 
+
+function processTogglTimeEntries(json) {
+    if(json == null || json.length == 0) {
+        alert("No time entries found");
+        return false;
+    }
+    
+    console.log ("JSON time entries fetched from Toggl");
+    
+    time_entries = json;
+    time_entry_key = -1;
+    registrations = [];
+    
+    processNextTimeEntry();
+}
+
+
 function fetchFromToggl() {
-    //var api_key = $.cookie("toggl_api_key");
-    //if(!api_key) {
-    //    api_key = prompt("Toggl API key", "");
-    //    $.cookie("toggl_api_key", api_key, { expires: 365 });
-    //}
-    //console.log("API key used: " + api_key); 
+    api_key = $.cookie("toggl_api_key");
+    if(!api_key) {
+        api_key = prompt("Toggl API key", "");
+        $.cookie("toggl_api_key", api_key, { expires: 365 });
+    }
+    console.log("API key used: " + api_key); 
     
     var date_string = document.getElementsByClassName("MainTopTitle")[0].innerHTML;
     
@@ -162,22 +193,22 @@ function fetchFromToggl() {
     
     console.log("Date range send to Toggl: " + start_date.toJSON() + " to " + end_date.toJSON());
     
-    //console.log(start_date.toJSON() + " - " + end_date.toJSON());
-    var url = "https://www.toggl.com/api/v6/time_entries.json";
-    
-    $.ajax({
-        url: url,
-        dataType: "json",
-        success: processTogglData,
-        error: processTogglDataError,
-        data: {
-            start_date: start_date.toJSON(), 
-            end_date: end_date.toJSON()
+    var url = "https://www.toggl.com/api/v8/time_entries";
+    $.ajax(
+        url,
+        { 
+            dataType: "json",
+            success: processTogglTimeEntries,
+            error: processTogglDataError,
+            data: {
+                start_date: start_date.toJSON(), 
+                end_date: end_date.toJSON()
+            },
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Basic " + btoa(api_key + ":api_token"));
+            }
         }
-        
-    }); 
-    //    username: api_key,
-    //    password: "api_token",
+    );
 }
 
 $(document).ajaxStart(function(){ 
