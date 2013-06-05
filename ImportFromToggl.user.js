@@ -48,7 +48,7 @@ function fillTimeRegistrationLine(project, activity, description, time) {
 }
 
 function processTogglDataError(jqXHR, textStatus, errorThrown) {
-    alert("Argh, we were unable to fetch your toggl time registrations!#% But hey, have you checked if you are logged in to toggl.com in your browser?");
+    alert("Argh, we were unable to fetch your toggl time registrations!#% You might try to check your toggl_api_key cookie or just ask that stupid dev...");
     console.log("Error:" + textStatus);
 }
 
@@ -172,7 +172,7 @@ function processTogglTimeEntries(json) {
 
 function fetchFromToggl() {
     api_key = $.cookie("toggl_api_key");
-    if(!api_key) {
+    if(!api_key || api_key == "null") {
         api_key = prompt("Toggl API key", "");
         $.cookie("toggl_api_key", api_key, { expires: 365 });
     }
