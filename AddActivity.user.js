@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       Add activity
 // @namespace  NaviWEB
-// @version    0.2
+// @version    0.12
 // @description  Makes it possible to add an activity in chrome browser and add activities to Toggl.
 // @match      http://time.valtech.dk/registration/reg_activity_edit.asp*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js
