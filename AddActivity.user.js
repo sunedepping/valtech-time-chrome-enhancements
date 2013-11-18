@@ -94,7 +94,7 @@ function createCustomerSuccess(json) {
 }    
     
 function getCustomerListSuccess(json) {
-    if(json == null || json.length == 0) {
+    if(json == null) {
         alert("No customer entries found");
         return false;
     }
